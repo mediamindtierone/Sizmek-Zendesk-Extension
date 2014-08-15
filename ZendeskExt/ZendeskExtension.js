@@ -2,10 +2,10 @@
 //{
 	var SLAs;
 	var RULEs = [
-		{caption:"Case exceed in 60 mins", color:"#FFFF00", variable:"#XX", value:"60", editMode:1},
-		{caption:"Case exceed in 30 mins", color:"#FF9700", variable:"#XX", value:"30", editMode:0},
-		{caption:"Case exceed in 15 mins", color:"#FF6200",variable:"#XX", value:"15", editMode:0},
-		{caption:"Case Exceeded", color:"#CC0000", variable:"#XX", value:"0", editMode:0},
+		{caption:"Ticket exceed in 60 mins", color:"#e8bd48", variable:"#XX", value:"60", editMode:1},
+		{caption:"Ticket exceed in 30 mins", color:"#ffb35c", variable:"#XX", value:"30", editMode:0},
+		{caption:"Ticket exceed in 15 mins", color:"#e86c3d",variable:"#XX", value:"15", editMode:0},
+		{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
 	];
 	var origRULEs;
 	
@@ -80,8 +80,8 @@
 				legendIconHandler.style.textAlign = "center";
 				
 				var legendIcon = new Image();
-				legendIcon.style.height = "35px";
-				legendIcon.style.width = "35px";
+				legendIcon.style.height = "25px";
+				legendIcon.style.width = "25px";
 				legendIcon.style.opacity = "0.4";
 				legendIcon.src = chrome.extension.getURL('images/Lancer_icon.png');
 				legendIcon.title = "Click ME to reset the Data";
@@ -119,8 +119,8 @@
 				var settingsIconHandler = document.createElement("div");
 				settingsIconHandler.style.textAlign = "center";
 				var settingsIcon = new Image();
-				settingsIcon.style.height = "30px";
-				settingsIcon.style.width = "30px";
+				settingsIcon.style.height = "25px";
+				settingsIcon.style.width = "25px";
 				settingsIcon.style.opacity = "0.4";
 				settingsIcon.src = chrome.extension.getURL('images/Vault_logo.png');
 				var settingsHandler = document.createElement("div");
@@ -144,8 +144,8 @@
 				statsHandler.appendChild(createStats());
 				statsHandler.setAttribute("id", "statsHandler");
 				var statsIcon = new Image();
-				statsIcon.style.height = "35px";
-				statsIcon.style.width = "35px";
+				statsIcon.style.height = "25px";
+				statsIcon.style.width = "25px";
 				statsIcon.style.opacity = "0.4";
 				statsIcon.src = chrome.extension.getURL('images/Titan_icon.png');
 				statsIcon.onclick = function()
