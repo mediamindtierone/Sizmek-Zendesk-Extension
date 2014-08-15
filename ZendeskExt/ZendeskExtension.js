@@ -1,5 +1,5 @@
-(function()
-{
+//(function()
+//{
 	var SLAs;
 	var RULEs = [
 		{caption:"Case exceed in 60 mins", color:"#FFFF00", variable:"#XX", value:"60", editMode:1},
@@ -8,10 +8,13 @@
 		{caption:"Case Exceeded", color:"#CC0000", variable:"#XX", value:"0", editMode:0},
 	];
 	var origRULEs;
-	var legendHandler;
 	
 	function init()
 	{
+		Array.prototype.contains = function(v) {
+			for(var i = 0; i < this.length; i++) { if(this[i] === v) return true; }
+			return false;
+		};
 		Array.prototype.unique = function() {
 			var arr = [];
 			for(var i = 0; i < this.length; i++) { if(!arr.contains(this[i])) arr.push(this[i]); }
@@ -135,10 +138,10 @@
 				document.body.appendChild(settingsHandler);
 				
 				var statsIconHandler = document.createElement("div");
+				statsIconHandler.style.textAlign = "center";
 				var statsHandler = document.createElement("div");
-				statsHandler.style.textAlign = "center";
-				statsHandler.appendChild(createStats());
 				statsHandler.style.display = "none";
+				statsHandler.appendChild(createStats());
 				statsHandler.setAttribute("id", "statsHandler");
 				var statsIcon = new Image();
 				statsIcon.style.height = "35px";
@@ -147,6 +150,8 @@
 				statsIcon.src = chrome.extension.getURL('images/Titan_icon.png');
 				statsIcon.onclick = function()
 				{
+					document.getElementById("statsData").remove();
+					document.getElementById("statsHandler").appendChild(createStats());
 					statsHandler.style.display = "block";
 				}
 				statsIcon.onmouseover = function() {statsIcon.style.opacity = "0.8";};
@@ -163,17 +168,33 @@
 	
 	function retrieveStats()
 	{
+		var message = "";
 		var results = [];
+		var tempResults = [];
+		var cnt=0;
 		var assignee = document.getElementsByClassName("assignee");
 		if(typeof(assignee)!="undefined"&&assignee.length>-1)
 		{
 			for(var i=0 ; i<assignee.length ; i++)
 			{
-				results.push(assignee.textContent);
+				if(assignee[i].textContent!="-")
+					tempResults.push(assignee[i].textContent);
 			}
 		}
 		
-		return results.unique();
+		results = tempResults.unique();
+		for(var i=0 ; i<results.length ; i++)
+		{
+			cnt=0;
+			for(var j=0 ; j<tempResults.length ; j++)
+			{
+				if(results[i]==tempResults[j])
+					cnt++;
+			}
+			message += results[i] + "  " + cnt + "<br>";
+		}
+		
+		return message;
 	}
 	
 	//_Create Form Functions
@@ -211,15 +232,38 @@
 	function createStats()
 	{
 		var statsContainer = document.createElement("div");
+		statsContainer.setAttribute("id","statsData");
 		var backDrop = document.createElement("div");
 		backDrop.setAttribute("class", "modal-backdrop  in");
 		var stats = document.createElement("div");
 		stats.setAttribute("class","modal");
+		stats.style.width = "500px";
+		var statsHeader = document.createElement("div");
+		statsHeader.setAttribute("class", "modal-header");
+		var statsClose = document.createElement("a");
+		statsClose.setAttribute("class", "close");
+		statsClose.setAttribute("data-dismiss", "modal");
+		statsClose.textContent = "×";
+		statsClose.onclick = function()
+		{
+			statsContainer.style.display = "none";
+		}
+		var statsData = document.createElement("div");
+		statsData.style.textAlign = "left";
+		statsData.style.paddingLeft = "10px";
+		statsData.innerHTML = retrieveStats();
+		var settingsHeaderCaption = document.createElement("h3");
+		settingsHeaderCaption.textContent = "Case Status";
+		var statsFooter = document.createElement("div");
+		statsFooter.setAttribute("class", "modal-footer");
+		statsFooter.style.marginTop = "219px";
+		statsFooter.style.width = "468px";
 		
-		
-		
-		stats.textContent = retrieveStats();
-		
+		statsHeader.appendChild(statsClose);
+		statsHeader.appendChild(settingsHeaderCaption);
+		stats.appendChild(statsHeader);
+		stats.appendChild(statsData);
+		stats.appendChild(statsFooter);
 		statsContainer.appendChild(backDrop);
 		statsContainer.appendChild(stats);
 		
@@ -342,5 +386,5 @@
 		placeIconsOnPage();
 	} 
 	catch(e) {console.log("error: " + e);}
-}
-)()
+//}
+//)()
