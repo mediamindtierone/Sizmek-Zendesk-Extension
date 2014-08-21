@@ -1,13 +1,22 @@
 //(function()
 //{
 	var SLAs;
-	var RULEs = [
-		{caption:"Ticket exceed in 60 mins", color:"#FFEB44", variable:"#XX", value:"60", editMode:1},
-		{caption:"Ticket exceed in 30 mins", color:"#E8B73F", variable:"#XX", value:"30", editMode:0},
-		{caption:"Ticket exceed in 15 mins", color:"#FF8B5E",variable:"#XX", value:"15", editMode:0},
-		{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
-	];
-	var origRULEs;
+	
+	var SZE =
+	{
+		RULEs: [
+			{caption:"Ticket exceed in 60 mins", color:"#FFEB44", variable:"#XX", value:"60", editMode:1},
+			{caption:"Ticket exceed in 30 mins", color:"#E8B73F", variable:"#XX", value:"30", editMode:0},
+			{caption:"Ticket exceed in 15 mins", color:"#FF8B5E",variable:"#XX", value:"15", editMode:0},
+			{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
+		],
+		SETTINGs: {
+			refreshRate:60000
+		}
+	};
+	var origSETTINGs;
+	var autoRefreshInterval;
+	var refreshBtn;
 	
 	function init()
 	{
@@ -19,6 +28,40 @@
 			var arr = [];
 			for(var i = 0; i < this.length; i++) { if(!arr.contains(this[i])) arr.push(this[i]); }
 			return arr; 
+		}
+	}
+	
+	function formatDate()
+	{
+		
+	}
+	
+	function autoRefresh()
+	{
+		var actionButtons = document.getElementsByClassName("action_button");
+		for(var i=0 ; i<actionButtons.length ; i++)
+		{
+			if(actionButtons[i].getAttribute("data-ember-action")==21)
+			{
+				refreshBtn = actionButtons[i];
+			}
+		}
+		
+		if(SZE.SETTINGs.refreshRate!=null&&typeof(SZE.SETTINGs.refreshRate)!="undefined"&&SZE.SETTINGs.refreshRate>0&&typeof(refreshBtn)!="undefined")
+		{
+			autoRefreshInterval = setInterval(function()
+			{
+				console.log("refreshing list");
+				refreshBtn.click();
+			},SZE.SETTINGs.refreshRate);
+		}
+		else
+		{
+			setTimeout(function()
+			{
+				checkData();
+				autoRefresh();
+			},2000);
 		}
 	}
 	
@@ -44,10 +87,10 @@
 		switch(ruleType) 
 		{
 			case "SLA":
-				for(var i=0 ; i<RULEs.length ; i++)
+				for(var i=0 ; i<SZE.RULEs.length ; i++)
 				{
-					if(value<=RULEs[i].value)
-						result = RULEs[i].color;
+					if(value<=SZE.RULEs[i].value)
+						result = SZE.RULEs[i].color;
 				}
 				break;
 			default:
@@ -59,9 +102,9 @@
 	
 	function resetData() 
 	{
-		localStorage.setItem("SizmekZendeskExtension", JSON.stringify(origRULEs));
+		localStorage.setItem("SizmekZendeskExtension", JSON.stringify(origSETTINGs));
 		var initData = localStorage.getItem("SizmekZendeskExtension");
-		RULEs = JSON.parse(initData);
+		SZE = JSON.parse(initData);
 	}
 	
 	function placeIconsOnPage() 
@@ -217,11 +260,11 @@
 		legendCaption.innerHTML = "Legend";
 		legendCaption.style.textAlign = "center";
 		legendHandler.appendChild(legendCaption);
-		for(var i=0 ; i<RULEs.length ; i++)
+		for(var i=0 ; i<SZE.RULEs.length ; i++)
 		{
 			var ruleHandler = document.createElement("div");
-			ruleHandler.textContent = RULEs[i].caption;
-			ruleHandler.style.background = RULEs[i].color;
+			ruleHandler.textContent = SZE.RULEs[i].caption;
+			ruleHandler.style.background = SZE.RULEs[i].color;
 			ruleHandler.style.border = "1px solid #ccc";
 			ruleHandler.style.margin = "5px";
 			legendHandler.appendChild(ruleHandler);
@@ -305,7 +348,7 @@
 		settingsSave.setAttribute("class","btn btn-inverse");
 		settingsSave.onclick = function()	
 		{
-			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(RULEs));
+			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(SZE));
 			container.style.display = "none";
 			
 			document.getElementById("legendData").remove();
@@ -317,28 +360,28 @@
 		rulesContainer.style.marginTop = "15px";
 		var rulesTable = document.createElement("table");
 		rulesTable.style.margin = "0px auto";
-		for(var i=0 ; i<RULEs.length ; i++)
+		for(var i=0 ; i<SZE.RULEs.length ; i++)
 		{
 			var row = document.createElement("tr");
 			row.style.border = "1px solid #ccc";
 			var colCaption = document.createElement("td");
-			colCaption.textContent = RULEs[i].caption;
+			colCaption.textContent = SZE.RULEs[i].caption;
 			colCaption.style.padding = "5px";
 			
 			var colValue = document.createElement("td");
 			var inputValue;
-			if(RULEs[i].editMode==1)
+			if(SZE.RULEs[i].editMode==1)
 			{
 				inputValue = document.createElement("input");
 				inputValue.type = "text";
 				inputValue.setAttribute("data-flag", i);
-				inputValue.value = RULEs[i].value;
-				inputValue.onchange = function() { RULEs[this.getAttribute("data-flag")].value = this.value; }
+				inputValue.value = SZE.RULEs[i].value;
+				inputValue.onchange = function() { SZE.RULEs[this.getAttribute("data-flag")].value = this.value; }
 			}
 			else
 			{
 				inputValue = document.createElement("label");
-				inputValue.textContent = RULEs[i].value;
+				inputValue.textContent = SZE.RULEs[i].value;
 			}
 			colValue.style.padding = "5px";
 			colValue.appendChild(inputValue);
@@ -346,14 +389,14 @@
 			var colColor = document.createElement("td");
 			var inputColor = document.createElement("input");
 			inputColor.type = "color";
-			inputColor.value = RULEs[i].color;
+			inputColor.value = SZE.RULEs[i].color;
 			inputColor.setAttribute("data-flag", i);
 			inputColor.style.width = "100px"
 			inputColor.style.display = "table-cell";
 			inputColor.style.border = "1px solid #ccc";
 			inputColor.onchange = function()
 			{
-				RULEs[this.getAttribute("data-flag")].color = this.value;
+				SZE.RULEs[this.getAttribute("data-flag")].color = this.value;
 			}
 			colColor.style.padding = "5px";
 			colColor.appendChild(inputColor);
@@ -376,23 +419,27 @@
 		return container;
 	}
 	
+	function checkData()
+	{
+		var initData = localStorage.getItem("SizmekZendeskExtension");
+		if(typeof(initData)!="undefined"&&initData!=null) SZE = JSON.parse(initData);
+		else
+		{
+			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(SZE));
+			initData = localStorage.getItem("SizmekZendeskExtension");
+			SZE = JSON.parse(initData);
+		}
+		origSETTINGs = SZE;
+	}
+	
 	//start me up
 	try 
 	{
 		init();
 		var extensionInterval = setInterval(function(){determineSLAs()}, 1000);
-		var initData = localStorage.getItem("SizmekZendeskExtension");
-		if(typeof(initData)!="undefined"&&initData!=null) RULEs = JSON.parse(initData);
-		else
-		{
-			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(RULEs));
-			initData = localStorage.getItem("SizmekZendeskExtension");
-			RULEs = JSON.parse(initData);
-		}
-		
-		
-		origRULEs = RULEs;
+		checkData();
 		placeIconsOnPage();
+		setTimeout(autoRefresh(), 2000);
 	} 
 	catch(e) {console.log("error: " + e);}
 //}
