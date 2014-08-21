@@ -2,9 +2,9 @@
 //{
 	var SLAs;
 	var RULEs = [
-		{caption:"Ticket exceed in 60 mins", color:"#e8bd48", variable:"#XX", value:"60", editMode:1},
-		{caption:"Ticket exceed in 30 mins", color:"#ffb35c", variable:"#XX", value:"30", editMode:0},
-		{caption:"Ticket exceed in 15 mins", color:"#e86c3d",variable:"#XX", value:"15", editMode:0},
+		{caption:"Ticket exceed in 60 mins", color:"#FFEB44", variable:"#XX", value:"60", editMode:1},
+		{caption:"Ticket exceed in 30 mins", color:"#E8B73F", variable:"#XX", value:"30", editMode:0},
+		{caption:"Ticket exceed in 15 mins", color:"#FF8B5E",variable:"#XX", value:"15", editMode:0},
 		{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
 	];
 	var origRULEs;
@@ -60,6 +60,7 @@
 	function resetData() 
 	{
 		localStorage.setItem("SizmekZendeskExtension", JSON.stringify(origRULEs));
+		var initData = localStorage.getItem("SizmekZendeskExtension");
 		RULEs = JSON.parse(initData);
 	}
 	
@@ -381,8 +382,16 @@
 		init();
 		var extensionInterval = setInterval(function(){determineSLAs()}, 1000);
 		var initData = localStorage.getItem("SizmekZendeskExtension");
-		origRULEs = RULEs;
 		if(typeof(initData)!="undefined"&&initData!=null) RULEs = JSON.parse(initData);
+		else
+		{
+			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(RULEs));
+			initData = localStorage.getItem("SizmekZendeskExtension");
+			RULEs = JSON.parse(initData);
+		}
+		
+		
+		origRULEs = RULEs;
 		placeIconsOnPage();
 	} 
 	catch(e) {console.log("error: " + e);}
