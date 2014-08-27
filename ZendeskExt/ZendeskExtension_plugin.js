@@ -15,7 +15,7 @@
 		}
 	};
 	var origSETTINGs;
-	var autoRefreshInterval;
+	var autoRefreshInterval, extensionInterval;
 	var refreshBtn;
 	
 	function init()
@@ -33,22 +33,7 @@
 	
 	function formatDate(sla, today)
 	{
-		var result;
-		var dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-		var monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-		if(sla.getDate()==today.getDate())
-			return "Today " + today.getHours() + ":" + today.getMinutes();
-		else if((sla.getDate()-today.getDate())==1)
-			return "Tomorrow " + sla.getHours() + ":" + sla.getMinutes();
-		else if((today.getDate()-sla.getDate())>1)
-			return monthNames[sla.getMonth()] + " " + sla.getDate();
-		else if((sla.getDate()-today.getDate())==-1)
-			return "Yesterday " + sla.getHours() + ":" + sla.getMinutes();
-		else if(sla.getWeek()==today.getWeek())
-			return dayNames[sla.getDay()] + " " + sla.getHours() + ":" + sla.getMinutes();
-		else if((today.getWeek()-sla.getWeek())>0)
-			return monthNames[sla.getMonth()] + " " + sla.getDate();
+		return moment(sla).fromNow();
 	}
 	
 	function autoRefresh()
@@ -66,7 +51,7 @@
 		{
 			autoRefreshInterval = setInterval(function()
 			{
-				console.log("refreshing list");
+				//console.log("refreshing list");
 				refreshBtn.click();
 			},SZE.SETTINGs.refreshRate);
 		}
@@ -132,9 +117,11 @@
 	
 	function resetData() 
 	{
+		clearInterval(autoRefreshInterval);
 		localStorage.setItem("SizmekZendeskExtension", JSON.stringify(origSETTINGs));
 		var initData = localStorage.getItem("SizmekZendeskExtension");
 		SZE = JSON.parse(initData);
+		setTimeout(autoRefresh(), 2000);
 	}
 	
 	function placeIconsOnPage() 
@@ -198,6 +185,7 @@
 				settingsIcon.style.height = "24px";
 				settingsIcon.style.width = "24px";
 				settingsIcon.style.opacity = "0.4";
+				settingsIcon.title = "Settings";
 				settingsIcon.src = "https://secure-ds.serving-sys.com/BurstingRes/Site-2/Type-0/b184dc4c-bb22-4477-a4e1-7c2038db24c4.png";
 				var settingsHandler = document.createElement("div");
 				settingsHandler.appendChild(createSettings());
@@ -224,11 +212,13 @@
 				statsIcon.style.height = "24px";
 				statsIcon.style.width = "24px";
 				statsIcon.style.opacity = "0.4";
+				statsIcon.title = "Case Status";
 				statsIcon.src = "https://secure-ds.serving-sys.com/BurstingRes/Site-2/Type-0/fc81b0ef-eb55-4ce4-bb64-8d80b8f79f12.png";
 				statsIcon.onclick = function()
 				{
 					document.getElementById("statsData").remove();
-					document.getElementById("statsHandler").appendChild(createStats());
+					document.body.appendChild(createStats());
+					//document.getElementById("statsHandler").appendChild(createStats());
 					statsHandler.style.display = "block";
 				}
 				statsIcon.onmouseover = function() {statsIcon.style.opacity = "0.8";};
@@ -289,7 +279,7 @@
 		legendHandler.style.background = "#e7e7e7";
 		legendHandler.style.borderTopRightRadius = "4px";
 		legendHandler.style.borderBottomRightRadius = "4px";
-		var legendCaption = document.createElement("div");
+		var legendCaption = document.createElement("span");
 		legendCaption.innerHTML = "Legend";
 		legendCaption.style.textAlign = "center";
 		legendHandler.appendChild(legendCaption);
@@ -341,8 +331,8 @@
 		stats.appendChild(statsHeader);
 		stats.appendChild(statsData);
 		stats.appendChild(statsFooter);
-		statsContainer.appendChild(backDrop);
 		statsContainer.appendChild(stats);
+		statsContainer.appendChild(backDrop);
 		
 		return statsContainer;
 	}
@@ -358,8 +348,8 @@
 		backDrop.setAttribute("class", "modal-backdrop  in");
 		var settings = document.createElement("div");
 		settings.setAttribute("class","modal");
-		settings.style.width = "500px";
-		settings.style.height = "500px";
+		settings.style.width = "510px";
+		settings.style.height = "516px";
 		var settingsHeader = document.createElement("div");
 		settingsHeader.setAttribute("class", "modal-header");
 		var settingsClose = document.createElement("a");
@@ -374,8 +364,8 @@
 		settingsHeaderCaption.textContent = "Sizmek Zendesk Extension";
 		var settingsFooter = document.createElement("div");
 		settingsFooter.setAttribute("class", "modal-footer");
-		settingsFooter.style.marginTop = "219px";
-		settingsFooter.style.width = "468px";
+		settingsFooter.style.marginTop = "235px";
+		settingsFooter.style.width = "478px";
 		var settingsSave = document.createElement("a");
 		settingsSave.textContent = "Save";
 		settingsSave.setAttribute("class","btn btn-inverse");
@@ -384,9 +374,26 @@
 			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(SZE));
 			container.style.display = "none";
 			
+			clearInterval(autoRefreshInterval);
+			setTimeout(autoRefresh(), 2000);
+			
 			document.getElementById("legendData").remove();
 			document.getElementById("legendHandler").appendChild(createLegend());
 		}
+		var refreshHandler = document.createElement("div");
+		refreshHandler.style.position = "inline";
+		refreshHandler.style.float = "left";
+		var refreshCaption = document.createElement("span");
+		refreshCaption.textContent = "Refresh Rate: ";
+		var refreshValue = document.createElement("input");
+		refreshValue.value = SZE.SETTINGs.refreshRate;
+		refreshValue.onchange = function()
+		{
+			SZE.SETTINGs.refreshRate = this.value;
+		}
+		refreshHandler.appendChild(refreshCaption);
+		refreshHandler.appendChild(refreshValue);
+		settingsFooter.appendChild(refreshHandler);
 		settingsFooter.appendChild(settingsSave);
 		
 		var rulesContainer = document.createElement("div");
@@ -455,6 +462,7 @@
 	function checkData()
 	{
 		var initData = localStorage.getItem("SizmekZendeskExtension");
+		origSETTINGs = SZE;
 		if(typeof(initData)!="undefined"&&initData!=null) SZE = JSON.parse(initData);
 		else
 		{
@@ -462,7 +470,6 @@
 			initData = localStorage.getItem("SizmekZendeskExtension");
 			SZE = JSON.parse(initData);
 		}
-		origSETTINGs = SZE;
 	}
 	
 	//start me up
@@ -470,8 +477,8 @@
 	{
 		init();
 		setDateTimeValue();
-		var extensionInterval = setInterval(function(){determineSLAs()}, 1000);
 		checkData();
+		extensionInterval = setInterval(function(){determineSLAs()}, 1000);
 		placeIconsOnPage();
 		setTimeout(autoRefresh(), 2000);
 	} 

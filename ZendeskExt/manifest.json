@@ -18,7 +18,8 @@
   "web_accessible_resources": [
 		"images/Lancer_icon.png",
 		"images/Titan_icon.png",
-		"images/Vault_logo.png"
+		"images/Vault_logo.png",
+		"scripts/moment.min.js"
   ],
   "browser_action": {
     "default_icon": "images/SizmekIcon.png",
