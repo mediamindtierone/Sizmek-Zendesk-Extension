@@ -11,7 +11,7 @@
 			{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
 		],
 		SETTINGs: {
-			refreshRate:60000
+			refreshRate:60000, version: "1.5"
 		}
 	};
 	var origSETTINGs;
@@ -38,30 +38,36 @@
 	
 	function autoRefresh()
 	{
-		var actionButtons = document.getElementsByClassName("action_button");
-		for(var i=0 ; i<actionButtons.length ; i++)
+		var icon_refresh = document.getElementsByClassName("icon-refresh")[0];
+		refreshBtn = icon_refresh.parentElement;
+		/*
+			//they changed the data-ember-action attribute value from 21 to 20 so this might not be a good element to check with
+			
+		var actionButtons = document.getElementsByClassName("action_button");for(var i=0 ; i<actionButtons.length ; i++){if(actionButtons[i].getAttribute("data-ember-action")==20){refreshBtn = actionButtons[i];}}
+		*/
+		if(typeof(refreshBtn)!="undefined"&&refreshBtn!=null)
 		{
-			if(actionButtons[i].getAttribute("data-ember-action")==21)
+			if(SZE.SETTINGs.refreshRate!=null&&typeof(SZE.SETTINGs.refreshRate)!="undefined"&&SZE.SETTINGs.refreshRate>0&&typeof(refreshBtn)!="undefined")
 			{
-				refreshBtn = actionButtons[i];
+				autoRefreshInterval = setInterval(function()
+				{
+					//console.log("refreshing list");
+					refreshBtn.click();
+				},SZE.SETTINGs.refreshRate);
 			}
-		}
-		
-		if(SZE.SETTINGs.refreshRate!=null&&typeof(SZE.SETTINGs.refreshRate)!="undefined"&&SZE.SETTINGs.refreshRate>0&&typeof(refreshBtn)!="undefined")
-		{
-			autoRefreshInterval = setInterval(function()
+			else
 			{
-				//console.log("refreshing list");
-				refreshBtn.click();
-			},SZE.SETTINGs.refreshRate);
+				setTimeout(function()
+				{
+					checkData();
+					autoRefresh();
+				},2000);
+			}
 		}
 		else
 		{
-			setTimeout(function()
-			{
-				checkData();
-				autoRefresh();
-			},2000);
+			autoRefresh();
+			console.log("resfresh button not found on the page. something might have changed.. again. Please contact Wind.");
 		}
 	}
 	
@@ -73,6 +79,7 @@
 			if(SLAs[i].textContent != "" ) 
 			{
 				SLAs[i].setAttribute("datetime", SLAs[i].textContent);
+				SLAs[i].style.minWidth = "157px";
 			}
 		}
 	}
@@ -248,7 +255,8 @@
 					tempResults.push(assignee[i].textContent);
 			}
 		}
-		
+		message += "<table>";
+		message += "<tr><th>Assignee</th><th> # of assigned cases</th></tr>";
 		results = tempResults.unique();
 		for(var i=0 ; i<results.length ; i++)
 		{
@@ -258,8 +266,11 @@
 				if(results[i]==tempResults[j])
 					cnt++;
 			}
-			message += results[i] + "  " + cnt + "<br>";
+			message += "<tr>";
+			message += "<td>" + results[i] + "</td>  <td style='text-align:center;'><b>" + cnt + "</b></td>";
+			message += "</tr>";
 		}
+		message += "</table>";
 		
 		return message;
 	}
@@ -384,12 +395,12 @@
 		refreshHandler.style.position = "inline";
 		refreshHandler.style.float = "left";
 		var refreshCaption = document.createElement("span");
-		refreshCaption.textContent = "Refresh Rate: ";
+		refreshCaption.textContent = "Refresh Rate (seconds): ";
 		var refreshValue = document.createElement("input");
-		refreshValue.value = SZE.SETTINGs.refreshRate;
+		refreshValue.value = parseInt(SZE.SETTINGs.refreshRate)/1000;
 		refreshValue.onchange = function()
 		{
-			SZE.SETTINGs.refreshRate = this.value;
+			SZE.SETTINGs.refreshRate = parseInt(this.value)*1000;
 		}
 		refreshHandler.appendChild(refreshCaption);
 		refreshHandler.appendChild(refreshValue);
@@ -469,6 +480,16 @@
 			localStorage.setItem("SizmekZendeskExtension", JSON.stringify(SZE));
 			initData = localStorage.getItem("SizmekZendeskExtension");
 			SZE = JSON.parse(initData);
+		}
+		checkVersion();
+	}
+	
+	function checkVersion()
+	{	
+		if(origSETTINGs.SETTINGs.version!=SZE.SETTINGs.version)
+		{
+			alert("There is a newer version of the Sizmek Zendesk Extension. Data will be set to default and will apply new data mapping.");
+			resetData();
 		}
 	}
 	
