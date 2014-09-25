@@ -1,3 +1,4 @@
+
 var SZE =
 {
 	RULEs: [
@@ -27,7 +28,10 @@ function init()
 
 function autoRefresh()
 {
-	var icon_refresh = document.getElementsByClassName("icon-refresh")[0];
+
+	var icon_refresh = $(".icon-refresh")[0];//document.getElementsByClassName("icon-refresh")[0];
+	if(typeof(icon_refresh)=="undefined"||icon_refresh.length<=0) return;
+	
 	refreshBtn = icon_refresh.parentElement;
 	if(typeof(refreshBtn)!="undefined"&&refreshBtn!=null)
 	{
@@ -114,7 +118,7 @@ function placeIconsOnPage()
 		if(typeof(prevIconElem)!="undefined" && prevIconElem != null)
 		{
 			clearInterval(ntvl);
-			$(".icons").before($('<div style="text-align:center;padding-top:15px;color:black;" id="legendIconHandler"><img src="' + extensionRoot + 'images/legend.png" title="Click ME to reset the Data" style="height: 24px; width: 24px; opacity: 0.4;" id="legendIcon"></div>'));
+			$(".icons").before($('<div style="text-align:center;padding-top:15px;color:black;" id="legendIconHandler"><img src="https://secure-ds.serving-sys.com/BurstingRes/Site-2/Type-0/782bd141-d3e1-4e40-98f4-60e7a7b50f9b.png" title="Click ME to reset the Data" style="height: 24px; width: 24px; opacity: 0.4;" id="legendIcon"></div>'));
 			createLegend();
 			$("#legendIcon").hover(
 			function(){
@@ -136,7 +140,7 @@ function placeIconsOnPage()
 				}
 			);
 			
-			$(".icons").before($('<div style="text-align: center; padding-top: 15px;" id="settingsIconHandler"><img title="Settings" src="' + extensionRoot + 'images/settings.png" style="height: 24px; width: 24px; opacity: 0.4;" id="settingsIcon"></div>'));
+			$(".icons").before($('<div style="text-align: center; padding-top: 15px;" id="settingsIconHandler"><img title="Settings" src="https://secure-ds.serving-sys.com/BurstingRes/Site-2/Type-0/b184dc4c-bb22-4477-a4e1-7c2038db24c4.png" style="height: 24px; width: 24px; opacity: 0.4;" id="settingsIcon"></div>'));
 			$("#settingsIcon").hover(
 				function(){	$(this).css("opacity","0.8");},
 				function(){	$(this).css("opacity","0.4");}
@@ -149,7 +153,7 @@ function placeIconsOnPage()
 				}
 			);
 			
-			$(".icons").before('<div style="text-align: center; padding-top: 15px;" id="statsIconHandler"><img title="Case Status" src="' + extensionRoot + 'images/stats.png" style="height: 24px; width: 24px; opacity: 0.4;" id="statsIcon"></div>');
+			$(".icons").before('<div style="text-align: center; padding-top: 15px;" id="statsIconHandler"><img title="Case Status" src="https://secure-ds.serving-sys.com/BurstingRes/Site-2/Type-0/fc81b0ef-eb55-4ce4-bb64-8d80b8f79f12.png" style="height: 24px; width: 24px; opacity: 0.4;" id="statsIcon"></div>');
 			$("#statsIcon").hover(
 				function(){	$(this).css("opacity","0.8");},
 				function(){	$(this).css("opacity","0.4");}
