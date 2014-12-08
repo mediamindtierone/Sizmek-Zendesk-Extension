@@ -7,10 +7,10 @@ var SZE =
 		{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
 	],
 	SETTINGs: {
-		refreshRate:60000, version: "1.6"
+		refreshRate:60000, version: "1.8"
 	}
 };
-var origSETTINGs, autoRefreshInterval, extensionInterval, refreshBtn, SLAs;
+var origSETTINGs, autoRefreshInterval, extensionInterval, refreshBtn, SLAs, tStatus, tTable;
 
 function init()
 {
@@ -27,9 +27,13 @@ function init()
 
 function autoRefresh()
 {
-	var icon_refresh = document.getElementsByClassName("icon-refresh")[0];
+	if(typeof(autoRefreshInterval)!="undefined") clearInterval(autoRefreshInterval);
+
+	var icon_refresh = $(".icon-refresh")[0];//document.getElementsByClassName("icon-refresh")[0];
+	if(typeof(icon_refresh)=="undefined"||icon_refresh.length<=0) return;
+	
 	refreshBtn = icon_refresh.parentElement;
-	if(typeof(refreshBtn)!="undefined"&&refreshBtn!=null)
+	if(typeof(refreshBtn)!="undefined"&&refreshBtn!=null&&refreshBtn.parentElement.tagName=="H1")
 	{
 		if(SZE.SETTINGs.refreshRate!=null&&typeof(SZE.SETTINGs.refreshRate)!="undefined"&&SZE.SETTINGs.refreshRate>0&&typeof(refreshBtn)!="undefined")
 		{
@@ -37,11 +41,11 @@ function autoRefresh()
 		}
 		else
 		{
-			setTimeout(function()
-			{
+			//setTimeout(function()
+			//{
 				checkData();
 				autoRefresh();
-			},2000);
+			//},2000);
 		}
 	}
 	else
@@ -53,7 +57,7 @@ function autoRefresh()
 
 function setDateTimeValue()
 {
-	SLAs = document.getElementsByClassName("21961139");
+	SLAs 	= document.getElementsByClassName("21961139");
 	for(var i=0 ; i<SLAs.length ; i++) 
 	{
 		if(SLAs[i].textContent != "" ) 
@@ -65,16 +69,28 @@ function setDateTimeValue()
 }
 function determineSLAs() 
 {
-	SLAs = document.getElementsByClassName("21961139");
+	SLAs 	= document.getElementsByClassName("21961139");
+	if(SLAs.length < 1) return;
+	
+	tTable 	= SLAs[0].parentElement.parentElement.parentElement;
+	tStatus = tTable.getElementsByClassName("status");
+	
 	for(var i=0 ; i<SLAs.length ; i++) 
 	{
-		if(SLAs[i].textContent != "" && SLAs[i].getAttribute("datetime") != null) 
+		if(SLAs[i].textContent != ""&& SLAs[i].getAttribute("datetime") != null) 
 		{
 			var toLocalDate = new Date(SLAs[i].getAttribute("datetime"));
 			var today = new Date();
 			var timeRemaining = (toLocalDate-today)/60000;
-			SLAs[i].textContent = moment(toLocalDate).fromNow();
-			SLAs[i].parentElement.style.background = equateRule(timeRemaining, "SLA");
+			
+			if(toLocalDate>0)
+			{
+				SLAs[i].textContent = moment(toLocalDate).fromNow();
+				SLAs[i].parentElement.style.background = equateRule(timeRemaining, "SLA");
+			} else {
+				if(tStatus[i].textContent.indexOf("h")==0)
+					SLAs[i].textContent = "On Hold";
+			}
 		} 
 		else {setDateTimeValue();}
 	}
@@ -103,7 +119,7 @@ function resetData()
 	localStorage.setItem("SizmekZendeskExtension", JSON.stringify(origSETTINGs));
 	var initData = localStorage.getItem("SizmekZendeskExtension");
 	SZE = JSON.parse(initData);
-	setTimeout(autoRefresh(), 2000);
+	autoRefresh();
 }
 
 function placeIconsOnPage() 
@@ -202,7 +218,7 @@ function createLegend()
 
 function createStats()
 {
-	$("body").append('<div id="statsData"><div class="modal" style="width: 500px;"><div class="modal-header"><a class="close" data-dismiss="modal">×</a><h3>Case Status</h3></div><div style="text-align: left; padding-left: 10px;" id="statsHolder"></div><div class="modal-footer" style="margin-top: 219px; width: 468px;"></div></div><div class="modal-backdrop  in"></div></div>');
+	$("body").append('<div id="statsData"><div class="modal" style="width: 500px;"><div class="modal-header"><a class="close" data-dismiss="modal">Ã—</a><h3>Case Status</h3></div><div style="text-align: left; padding-left: 10px;" id="statsHolder"></div><div class="modal-footer" style="margin-top: 219px; width: 468px;"></div></div><div class="modal-backdrop  in"></div></div>');
 	$("#statsData").click(
 		function(){$(this).remove();}
 	);
@@ -211,7 +227,7 @@ function createStats()
 
 function createSettings() 
 {
-	$("body").append('<div id="settingsData" style="z-index: 999999; position: absolute;"><div id="settingsContainer" class="modal" style="width: 510px; height: 516px;"><div class="modal-header"><a class="close" data-dismiss="modal" id="settingsClose">×</a><h3>Sizmek Zendesk Extension</h3></div><div id="rulesContainer" style="margin-top:15px;"></div><div id="settingsFooter" class="modal-footer" style="margin-top: 235px; width: 478px;"><div style="float: left;"><span>Refresh Rate (seconds): </span><input id="refreshValue" type="text"/></div><a class="btn btn-inverse" id="settingsSave">Save</a></div></div><div class="modal-backdrop  in"></div></div>');
+	$("body").append('<div id="settingsData" style="z-index: 999999; position: absolute;"><div id="settingsContainer" class="modal" style="width: 510px; height: 516px;"><div class="modal-header"><a class="close" data-dismiss="modal" id="settingsClose">Ã—</a><h3>Sizmek Zendesk Extension</h3></div><div id="rulesContainer" style="margin-top:15px;"></div><div id="settingsFooter" class="modal-footer" style="margin-top: 235px; width: 478px;"><div style="float: left;"><span>Refresh Rate (seconds): </span><input id="refreshValue" type="text"/></div><a class="btn btn-inverse" id="settingsSave">Save</a></div></div><div class="modal-backdrop  in"></div></div>');
 	$("#settingsData").hide();
 	$("#settingsClose").click(
 		function(){$("#settingsData").remove();}
@@ -223,7 +239,7 @@ function createSettings()
 			$("#settingsData").remove();
 			
 			clearInterval(autoRefreshInterval);
-			setTimeout(autoRefresh(), 2000);
+			autoRefreshInterval = setInterval(autoRefresh(), 2000);
 			
 			$("#legendData").remove();
 			createLegend();
@@ -298,6 +314,11 @@ try
 	checkData();
 	extensionInterval = setInterval(function(){determineSLAs()}, 1000);
 	placeIconsOnPage();
-	setTimeout(autoRefresh(), 2000);
+	var zz_to = setTimeout(
+		function() 
+		{
+			clearTimeout(zz_to);
+			autoRefresh();
+		},4000);
 } 
 catch(e) {console.log("error: " + e);}

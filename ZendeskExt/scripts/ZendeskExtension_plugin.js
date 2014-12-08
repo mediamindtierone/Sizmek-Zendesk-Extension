@@ -1,4 +1,3 @@
-
 var SZE =
 {
 	RULEs: [
@@ -8,10 +7,10 @@ var SZE =
 		{caption:"Ticket Exceeded", color:"#ff5351", variable:"#XX", value:"0", editMode:0},
 	],
 	SETTINGs: {
-		refreshRate:60000, version: "1.6"
+		refreshRate:60000, version: "1.8.1"
 	}
 };
-var origSETTINGs, autoRefreshInterval, extensionInterval, refreshBtn, SLAs;
+var origSETTINGs, autoRefreshInterval, extensionInterval, refreshBtn, SLAs, tStatus, tTable;
 
 function init()
 {
@@ -28,12 +27,13 @@ function init()
 
 function autoRefresh()
 {
+	if(typeof(autoRefreshInterval)!="undefined") clearInterval(autoRefreshInterval);
 
 	var icon_refresh = $(".icon-refresh")[0];//document.getElementsByClassName("icon-refresh")[0];
 	if(typeof(icon_refresh)=="undefined"||icon_refresh.length<=0) return;
 	
 	refreshBtn = icon_refresh.parentElement;
-	if(typeof(refreshBtn)!="undefined"&&refreshBtn!=null)
+	if(typeof(refreshBtn)!="undefined"&&refreshBtn!=null&&refreshBtn.parentElement.tagName=="H1")
 	{
 		if(SZE.SETTINGs.refreshRate!=null&&typeof(SZE.SETTINGs.refreshRate)!="undefined"&&SZE.SETTINGs.refreshRate>0&&typeof(refreshBtn)!="undefined")
 		{
@@ -41,11 +41,11 @@ function autoRefresh()
 		}
 		else
 		{
-			setTimeout(function()
-			{
+			//setTimeout(function()
+			//{
 				checkData();
 				autoRefresh();
-			},2000);
+			//},2000);
 		}
 	}
 	else
@@ -57,7 +57,7 @@ function autoRefresh()
 
 function setDateTimeValue()
 {
-	SLAs = document.getElementsByClassName("21961139");
+	SLAs 	= document.getElementsByClassName("21961139");
 	for(var i=0 ; i<SLAs.length ; i++) 
 	{
 		if(SLAs[i].textContent != "" ) 
@@ -69,16 +69,28 @@ function setDateTimeValue()
 }
 function determineSLAs() 
 {
-	SLAs = document.getElementsByClassName("21961139");
+	SLAs 	= document.getElementsByClassName("21961139");
+	if(SLAs.length < 1) return;
+	
+	tTable 	= SLAs[0].parentElement.parentElement.parentElement;
+	tStatus = tTable.getElementsByClassName("status");
+	
 	for(var i=0 ; i<SLAs.length ; i++) 
 	{
-		if(SLAs[i].textContent != "" && SLAs[i].getAttribute("datetime") != null) 
+		if(SLAs[i].textContent != ""&& SLAs[i].getAttribute("datetime") != null) 
 		{
 			var toLocalDate = new Date(SLAs[i].getAttribute("datetime"));
 			var today = new Date();
 			var timeRemaining = (toLocalDate-today)/60000;
-			SLAs[i].textContent = moment(toLocalDate).fromNow();
-			SLAs[i].parentElement.style.background = equateRule(timeRemaining, "SLA");
+			
+			if(toLocalDate>0)
+			{
+				SLAs[i].textContent = moment(toLocalDate).fromNow();
+				SLAs[i].parentElement.style.background = equateRule(timeRemaining, "SLA");
+			} else {
+				if(tStatus[i].textContent.indexOf("h")==0)
+					SLAs[i].textContent = "On Hold";
+			}
 		} 
 		else {setDateTimeValue();}
 	}
@@ -107,7 +119,7 @@ function resetData()
 	localStorage.setItem("SizmekZendeskExtension", JSON.stringify(origSETTINGs));
 	var initData = localStorage.getItem("SizmekZendeskExtension");
 	SZE = JSON.parse(initData);
-	setTimeout(autoRefresh(), 2000);
+	autoRefresh();
 }
 
 function placeIconsOnPage() 
@@ -227,7 +239,7 @@ function createSettings()
 			$("#settingsData").remove();
 			
 			clearInterval(autoRefreshInterval);
-			setTimeout(autoRefresh(), 2000);
+			autoRefreshInterval = setInterval(autoRefresh(), 2000);
 			
 			$("#legendData").remove();
 			createLegend();
@@ -302,6 +314,11 @@ try
 	checkData();
 	extensionInterval = setInterval(function(){determineSLAs()}, 1000);
 	placeIconsOnPage();
-	setTimeout(autoRefresh(), 2000);
+	var zz_to = setTimeout(
+		function() 
+		{
+			clearTimeout(zz_to);
+			autoRefresh();
+		},4000);
 } 
 catch(e) {console.log("error: " + e);}

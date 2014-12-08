@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Sizmek Zendesk Extension",
+  "description": "This extension used for Support usage of Zendesk",
+  "version": "1.6",
+
+  "permissions": [
+    "<all_urls>","webRequest","webRequestBlocking","cookies", "tabs","storage", "unlimitedStorage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://sizmek.zendesk.com/*"],      
+      "js": ["extension.js"],
+	  "all_frames": true,
+	  "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+		"images/stats.png",
+		"images/legend.png",
+		"images/settings.png",
+		"scripts/moment.min.js",
+		"scripts/ZendeskExtension_plugin.js"
+  ],
+  "browser_action": {
+    "default_icon": "images/SizmekIcon.png",
+    "default_title": "Sizmek Zendesk Extension"  
+  }  
+}
